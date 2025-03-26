@@ -4,23 +4,31 @@ __pycache__/
 *$py.class
 *.so
 .Python
+env/
 venv/
 ENV/
 *.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
 
 # Node.js
 node_modules/
-/build
+build/
+.npm
+.yarn
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Environment variables
+.env
+backend/.env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Environment variables
-.env
 
 # Uploaded files
 backend/uploads/*
@@ -35,3 +43,12 @@ backend/uploads/*
 # OS specific
 .DS_Store
 Thumbs.db
+
+# Build files
+/frontend/dist
+/frontend/build
+/frontend/.cache
+
+# Logs
+logs
+*.log

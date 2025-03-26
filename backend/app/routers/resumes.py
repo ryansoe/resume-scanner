@@ -17,13 +17,16 @@ from app.utils.openai_helper import (
     calculate_overall_score,
     generate_feedback
 )
+from app.core.config import settings
 
 router = APIRouter(prefix="/resumes", tags=["resumes"])
 
 # In-memory storage for uploaded resumes
 # In a production app, you would use a database
 UPLOADED_RESUMES = {}
-UPLOAD_FOLDER = "uploads"
+
+# Configure uploads folder - use environment variable or default to "uploads"
+UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER", "uploads")
 
 # Create uploads directory if it doesn't exist
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -33,38 +36,55 @@ async def upload_resumes(files: List[UploadFile] = File(...)):
     """Upload multiple resume files (PDF, DOCX)"""
     responses = []
     
-    for file in files:
-        # Validate file extension
-        file_extension = os.path.splitext(file.filename)[1].lower()
-        if file_extension not in ['.pdf', '.docx']:
+    try:
+        for file in files:
+            # Validate file extension
+            file_extension = os.path.splitext(file.filename)[1].lower()
+            if file_extension not in ['.pdf', '.docx']:
+                responses.append(
+                    ResumeUploadResponse(
+                        filename=file.filename,
+                        status="error: unsupported file format"
+                    )
+                )
+                continue
+            
+            # Generate unique ID for the resume
+            resume_id = str(uuid.uuid4())
+            
+            # Save file to disk
+            file_path = os.path.join(UPLOAD_FOLDER, f"{resume_id}{file_extension}")
+            try:
+                with open(file_path, "wb") as buffer:
+                    shutil.copyfileobj(file.file, buffer)
+            except Exception as e:
+                responses.append(
+                    ResumeUploadResponse(
+                        filename=file.filename,
+                        status=f"error: failed to save file - {str(e)}"
+                    )
+                )
+                continue
+            
+            # Store file info in memory
+            UPLOADED_RESUMES[resume_id] = {
+                "id": resume_id,
+                "filename": file.filename,
+                "file_path": file_path
+            }
+            
             responses.append(
                 ResumeUploadResponse(
                     filename=file.filename,
-                    status="error: unsupported file format"
+                    status="success"
                 )
             )
-            continue
-        
-        # Generate unique ID for the resume
-        resume_id = str(uuid.uuid4())
-        
-        # Save file to disk
-        file_path = os.path.join(UPLOAD_FOLDER, f"{resume_id}{file_extension}")
-        with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
-        
-        # Store file info in memory
-        UPLOADED_RESUMES[resume_id] = {
-            "id": resume_id,
-            "filename": file.filename,
-            "file_path": file_path
-        }
-        
-        responses.append(
-            ResumeUploadResponse(
-                filename=file.filename,
-                status="success"
-            )
+    except Exception as e:
+        # Log the exception
+        print(f"Error uploading files: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error uploading files: {str(e)}"
         )
     
     return responses

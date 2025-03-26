@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from typing import Optional
+from typing import Optional, List
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
@@ -20,6 +20,16 @@ class Settings:
     DB_NAME: str = os.getenv("DB_NAME", "resume_scanner")
     
     # CORS settings
-    BACKEND_CORS_ORIGINS: list = ["http://localhost:3000", "http://localhost:8000"]
+    BACKEND_CORS_ORIGINS: List[str] = [
+        "http://localhost:3000",
+        "http://localhost:8000",
+        "https://resume-scanner-frontend.vercel.app",  # Vercel default domain
+        "https://resume-scanner-ryansoe.vercel.app",   # Your potential Vercel subdomain
+    ]
+    
+    # Allow adding additional CORS origins from environment variable
+    if os.getenv("ADDITIONAL_CORS_ORIGINS"):
+        additional_origins = os.getenv("ADDITIONAL_CORS_ORIGINS").split(",")
+        BACKEND_CORS_ORIGINS.extend([origin.strip() for origin in additional_origins])
 
 settings = Settings() 
