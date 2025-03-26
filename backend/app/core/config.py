@@ -20,11 +20,11 @@ class Settings:
     DB_NAME: str = os.getenv("DB_NAME", "resume_scanner")
     
     # CORS settings
-    BACKEND_CORS_ORIGINS: List[str] = [
+    BACKEND_CORS_ORIGINS: list = [
         "http://localhost:3000",
-        "http://localhost:8000",
-        "https://resume-scanner-frontend.vercel.app",  # Vercel default domain
-        "https://resume-scanner-ryansoe.vercel.app",   # Your potential Vercel subdomain
+        "https://resume-scanner-ryansoe.vercel.app",  # Add your Vercel domain
+        "https://resume-scanner.vercel.app",
+        "*"  # Temporarily allow all origins for testing
     ]
     
     # Allow adding additional CORS origins from environment variable

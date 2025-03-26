@@ -3,7 +3,7 @@ from typing import List, Dict, Any
 from openai import OpenAI
 from app.core.config import settings
 
-# Initialize OpenAI client
+# Initialize OpenAI client with simplified configuration
 client = OpenAI(api_key=settings.OPENAI_API_KEY)
 
 def extract_skills_from_text(text: str) -> List[Dict[str, Any]]:
